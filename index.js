@@ -1,17 +1,23 @@
 const Config = require("./config")
-const clc = require("cli-color")
+const Clc = require("cli-color")
 const Onoff = require("onoff")
 const Gpio = Onoff.Gpio
 
-const led = new Gpio(Config.led.bcm, "out")
+const led1 = new Gpio(Config.led.bcm[0], "out")
+const led2 = new Gpio(Config.led.bcm[1], "out")
+
 const option = process.argv[2]
 
 if (option !== "-s") {
-	console.log("My LED bound to", clc.green(Config.led.bcm), "Let's get started", `with ${clc.yellow('no')} argument.`)
-	console.log(`if u Wanna Hide log message use ${clc.cyan('-s')} option When u Execute`)
+	Config.led.bcm.map((pin) => {
+		console.log("My LED bound to", Clc.green(pin), "Let's get started", 
+			`with ${Clc.yellow('no')} argument.`)
+	})
+
+	console.log(`if u Wanna Hide log message use ${Clc.cyan('-s')} option When u Execute`)
 }
 
-const blink = () => {
+const blink = (led, name) => {
 	let mode = true
 	let statusValue = (mode) => mode ? Config.led.on : Config.led.off
 	let statusMessage = (mode) => mode ? "ON" : "OFF"
@@ -20,11 +26,13 @@ const blink = () => {
 		led.write(statusValue(mode), (err) => {
 			if (err) throw new Error(err)
 			if (option !== "-s") {
-				console.log("changed LED state to:", clc.red(statusMessage(mode)))
+				console.log(`changed ${Clc.white(name)} LED state to:`, Clc.red(statusMessage(mode)))
 			}
 			mode = !mode
 		})
 	}
 }
 
-setInterval(blink(), 500)
+setInterval(blink(led1, "Yello"), 500)
+setInterval(blink(led2, "Red"), 250)
+
